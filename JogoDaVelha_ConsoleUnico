@@ -11,6 +11,7 @@ vencedor = ""
 matriz = [[" ", " ", " "],[" ", " ", " "],[" ", " ", " "]]
 
 # --- FUNÇÔES ---
+#Define o visual do tabuleiro
 def tela():
     global matriz
     global jogadas
@@ -23,7 +24,7 @@ def tela():
     print("3:    " + matriz[2][0] + " | " + matriz[2][1] + " | "+ matriz[2][2])
     print("Jogadas: " + str(jogadas))
 
-#Define o turno do Jogador
+#Define como deve ser o turno do Jogador
 def jogadorJoga():
     global jogadas
     global quemJoga
@@ -70,7 +71,7 @@ def cpuJoga():
         quemJoga = 2
         jogadas+=1
 
-#Analisa a matriz e verifica se houve vitória
+#Analisa o tabuleiro e verifica se houve vitória
 def verificarVitoria():
     global matriz
     vitoria = "n"
@@ -139,7 +140,7 @@ def verificarVitoria():
             break
     return vitoria
 
-#Redefine as variáveis do Jogo
+#Redesenha/Redefine o tabuleiro
 def redefinir():
     global matriz
     global jogadas
