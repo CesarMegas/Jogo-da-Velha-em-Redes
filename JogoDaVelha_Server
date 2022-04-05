@@ -1,0 +1,141 @@
+# --- IMPORTS ---
+from socket import *
+import os
+import random
+
+# --- VARIÁVEIS ---
+jogarNovamente = "s"
+jogadas = 0
+quemJoga = 2 # 1 = Turno da CPU | 2 = Turno do Jogador
+maxJogadas = 9
+vencedor = ""
+matriz = [[" ", " ", " "],[" ", " ", " "],[" ", " ", " "]]
+serverPort = 1200
+serverSocket = socket(AF_INET,SOCK_STREAM)
+serverSocket.bind(("",serverPort))
+serverSocket.listen(5) # o argumento “listen” diz à biblioteca de soquetes que queremos enfileirar no máximo 5 requisições de conexão (normalmente o máximo) antes de recusar começar a recusar conexões externas. Caso o resto do código esteja escrito corretamente, isso deverá ser o suficiente.
+print ("TCP Server\n")
+connectionSocket, addr = serverSocket.accept()
+
+# --- FUNÇÔES ---
+#Define como vai ser o turno da CPU
+def cpuJoga():
+    receberDados()
+    global maxJogadas
+    
+
+    if quemJoga == 1 and jogadas < maxJogadas:
+        l = random.randrange(0, 3)
+        c = random.randrange(0, 3)
+
+        while matriz [l][c] != " ":
+            l = random.randrange(0, 3)
+            c = random.randrange(0, 3)
+        
+        matriz[l][c] = "O"
+        quemJoga = 2
+        jogadas+=1
+        enviarDados()
+
+
+#Analisa o tabuleiro e verifica se houve vitória
+def verificarVitoria():
+    global matriz
+    vitoria = "n"
+    simbolos = ["X", "O"]
+
+    for s in simbolos:
+        vitoria = "n"
+        il = ic = 0
+
+        #Verifica as linhas
+        while il < 3:
+            soma = 0
+            ic = 0
+            while ic < 3:
+                if(matriz[il][ic] == s):
+                    soma+=1
+                ic+=1
+            if(soma == 3):
+                vitoria = s
+                break
+            il += 1
+
+        if(vitoria != "n"):
+            break
+
+        #Verifica as colunas
+        il = ic = 0
+        while ic < 3:
+            soma = 0
+            il = 0
+            while il < 3:
+                if(matriz[il][ic] == s):
+                    soma+=1
+                il+=1
+            if(soma == 3):
+                vitoria = s
+                break
+            ic += 1
+
+        if(vitoria != "n"):
+            break
+
+        #Verifica a diagonal Esquerda-Direita
+        soma = 0
+        idiag = 0
+
+        while idiag <3:
+            if(matriz[idiag][idiag] == s):
+                soma+=1
+            idiag += 1
+        if(soma == 3):
+            vitoria = s
+            break
+
+        #Verifica a diagonal Direita-Esquerda
+        soma = 0
+        idiagl = 0
+        idiagc = 2
+        while idiagc >= 0:
+            if(matriz[idiagl][idiagc] == s):
+                soma+=1
+            idiagl += 1
+            idiagc -= 1
+        if(soma == 3):
+            vitoria = s
+            break
+    return vitoria
+
+
+#Envia os dados para o servidor
+def enviarDados():
+    connectionSocket.send(matriz)
+    connectionSocket.send(quemJoga)
+    connectionSocket.send(matriz)
+    connectionSocket.send(verificarVitoria)
+
+
+
+#Envia os dados para o servidor
+def receberDados():
+    connectionSocket.recv(matriz)
+    connectionSocket.recv(quemJoga)
+    connectionSocket.recv(matriz)
+    connectionSocket.recv(verificarVitoria)
+
+
+
+
+#Loop principal do jogo
+while(jogarNovamente == "s"):
+    while True:
+        receberDados()
+        cpuJoga()
+        vencedor = verificarVitoria()
+
+        vencedor = verificarVitoria()
+        if(vencedor != "n") or (jogadas >= maxJogadas):
+            break
+if (jogarNovamente == "n"):
+    connectionSocket.close()
